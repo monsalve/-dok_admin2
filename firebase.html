@@ -1,0 +1,257 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+    https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-firestore.js"></script>
+
+
+    <script>
+
+        // Your web app's Firebase configuration
+       var firebaseConfig = {
+			apiKey: "AIzaSyDKhw55SP9oMwUm8wHuHHiYLps_buf-CHA",
+			authDomain: "login1-b79c2.firebaseapp.com",
+			databaseURL: "https://login1-b79c2.firebaseio.com",
+			projectId: "login1-b79c2",
+			storageBucket: "login1-b79c2.appspot.com",
+			messagingSenderId: "346076197050",
+			appId: "1:346076197050:web:d46106a801091eac7c5283",
+			measurementId: "G-4KVLWGKV8N"
+
+	  };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+    </script>
+
+    <script>
+		firebase.auth().onAuthStateChanged(function(user) {
+		  if (user) {
+			console.log("logeado");
+		  } else {
+			console.log("no logeado");
+		  }
+		});
+		
+        function crearCuenta ()
+        {
+            //let nombres = document.getElementById('inputNombres');
+            let email = document.getElementById('inputEmail').value;
+            let password = document.getElementById('inputPassword').value;
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then(result => {
+                result.user.updateProfile({
+                    displayName: 'sss'
+                })
+            }).catch((error) => {
+                console.log(error.code);
+                console.log(error.message);
+            });   
+        }
+        function logeo()
+        {
+            let email = document.getElementById('inputEmail').value;
+            let password = document.getElementById('inputPassword').value;
+
+            firebase.auth().signInWithEmailAndPassword(email, password)
+            .then(result => {
+                console.log("logea");
+                console.log(result.user);
+            })
+            .catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              console.log("errorCode = " + errorCode + " errorMessage = " + errorMessage);
+              // ...
+            });
+        }
+
+        function logeoOut()
+        {
+            firebase.auth().signOut()
+            .then(() =>{
+                console.log("sale");
+            })
+            .catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              console.log("errorCode = " + errorCode + " errorMessage = " + errorMessage);
+              // ...
+            });
+        }
+
+        function loginGoogle()
+        {
+            const provider = new firebase.auth.GoogleAuthProvider();
+
+            firebase.auth().signInWithPopup(provider)
+            .then(function(result) 
+            {
+             // This gives you a Google Access Token.
+                var token = result.credential.accessToken;
+             // The signed-in user info.
+                var user = result.user;
+
+                console.log("token = " + token + " user = " + user);
+            }).catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              console.log("errorCode = " + errorCode + " errorMessage = " + errorMessage);
+              // ...
+            });
+        }
+
+		function loginFace()
+		{		
+			const provider = new firebase.auth.FacebookAuthProvider();
+			
+			firebase.auth().signInWithPopup(provider)
+            .then(function(result) 
+            {             
+                var token = result.credential.accessToken;             
+                var user_foto = result.user.photoURL;
+
+                console.log("token = " + token + " user_foto = " + user_foto);
+            }).catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              console.log("errorCode = " + errorCode + " errorMessage = " + errorMessage);
+              // ...
+            });
+		}
+		
+		function datosUsu(){
+			const user = firebase.auth().currentUser;
+			console.log("llega");
+			console.log(user);
+		 
+		}
+		
+		function agregar(){
+			
+			var db = firebase.firestore();
+			
+			
+			var preguntas = [
+				
+	
+			];
+			var cont = 0;
+			preguntas.forEach(element => {
+				cont++;
+				var coleccion = db.collection('preguntas_nivel4')
+							.add({
+								pregunta: element.pregunta,								
+								opcion_a: element.opcion_a,
+								opcion_b: element.opcion_b,
+								opcion_c: element.opcion_c,
+								opcion_d: element.opcion_d,
+								respuesta: element.respuesta,
+								pista: element.pista,
+								numeral: cont
+							})
+							.then(refDoc =>{            
+									console.log("Agregado Id= ${refDoc.id}");
+							})
+							.catch(error =>{
+							  console.error(error);
+							});
+			});
+			//console.log(preguntas);
+			/*
+			var coleccion = db.collection('prueba-coleccion')
+							.add({
+								apellido: 'Pantoja',
+								nombre: 'Camilo'
+							})
+							.then(refDoc =>{            
+									cosole.log("Agregado Id= ${refDoc.id}");
+							})
+							.catch(error =>{
+							  console.error('error creaando => ${error}');
+							});
+			*/
+		}
+			
+		function consultar(){ /// en tiempo real
+		
+			var db = firebase.firestore();
+			db.collection('prueba-coleccion').onSnapshot(querySnapshot => {
+				//console.log(querySnapshot);
+				querySnapshot.forEach(prueb => {
+					//onsole.log(" listando ");
+					console.log(prueb.data().apellido);
+				})
+			});
+		}
+		
+		function consultarUno(){ /// en tiempo real
+		
+			var db = firebase.firestore();
+			db.collection('prueba-coleccion')
+			.where('nombre', '==' , 'Monsalve')
+			.onSnapshot(querySnapshot => {
+				//console.log(querySnapshot);
+				querySnapshot.forEach(prueb => {
+					onsole.log(" listando ");
+					console.log(prueb.data());
+				})
+			});
+		}
+		
+		function listaUsuarios(){
+		
+		}
+		
+		
+    </script>
+
+    <form>
+        <label>Nombres</label>
+        <input type="text" id="inputNombres">
+        <br>
+        <label>Email</label>
+        <input type="text" id="inputEmail">
+        <br>
+        <label>Contraseña</label>
+        <input type="password" id="inputPassword">
+        <br>
+        <input type="button" onclick="crearCuenta()" value="Registrarme">
+   
+        <br>
+        <input type="button" onclick="logeo()" value="login">
+        <br>
+        <input type="button" onclick="logeoOut()" value="login-out">
+        <br>
+        <input type="button" onclick="loginGoogle()" value="login-google">
+		<br>
+		<input type="button" onclick="loginFace()" value="login-facebook">
+		<br>
+		<input type="button" onclick="datosUsu()" value="Datos Usuarios">
+		<br>
+		<input type="button" onclick="agregar()" value="Agregar">
+		<br>
+		<input type="button" onclick="consultar()" value="consultar">
+		<br>
+		<input type="button" onclick="consultarUno()" value="consultar Uno">
+		<br>
+		<input type="button" onclick="listaUsuarios()" value="Lista Usuarios">
+    </form>
+</body>
+
+</html>
